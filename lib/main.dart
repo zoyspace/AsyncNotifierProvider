@@ -64,7 +64,7 @@ class TodoListView extends ConsumerWidget {
                       tileColor: Colors.blue.shade200,
                       title: Text(todo.description),
                       leading: Checkbox(
-                          activeColor: Colors.blue,
+                          activeColor: Colors.deepOrange,
                           value: todo.completed,
                           onChanged: ((value) =>
                               asyncFunc.toggle(todo.pageId, !todo.completed))

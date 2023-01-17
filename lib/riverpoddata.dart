@@ -44,14 +44,12 @@ final String bodyGet = jsonEncode(bodyGetApi);
 class Todo {
   const Todo({
     required this.pageId,
-    required this.id,
     required this.description,
     required this.completed,
   });
 
   factory Todo.fromJson(dynamic todo) {
     final String workPageId = todo['id'];
-    final int workId = todo['properties']['id']['number'] ?? 0;
     final String workDescription = todo['properties']['description']
             ['rich_text']
         .map((text) => text['plain_text'])
@@ -61,19 +59,16 @@ class Todo {
 
     return Todo(
       pageId: workPageId,
-      id: workId,
       description: workDescription,
       completed: workCompleted,
     );
   }
   // All properties should be `final` on our class.
   final String pageId;
-  final int id;
   final String description;
   final bool completed;
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
         'description': description,
         'completed': completed,
       };
