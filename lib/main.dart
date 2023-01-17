@@ -29,7 +29,7 @@ class TodoListView extends ConsumerWidget {
     // rebuild the widget when the todo list changes
     final asyncTodos = ref.watch(asyncTodosProvider);
     final asyncFunc = ref.read(asyncTodosProvider.notifier);
-    TextEditingController _addTextController = TextEditingController();
+    TextEditingController addTextController = TextEditingController();
 
     // Let's render the todos in a scrollable list view
     return Scaffold(
@@ -41,18 +41,18 @@ class TodoListView extends ConsumerWidget {
               Expanded(
                 child: TextField(
                   decoration: const InputDecoration(
-                    fillColor: Colors.amber,
+                    fillColor: Color.fromARGB(255, 144, 202, 249),
                     filled: true,
                     // icon: Icon(Icons.add),
-                    hintText: "shopping",
-                    labelText: "add todo",
+                    // hintText: "shopping",
+                    // labelText: "add todo",
                   ),
-                  controller: _addTextController,
+                  controller: addTextController,
                 ),
               ),
               FloatingActionButton(
                   child: const Icon(Icons.add),
-                  onPressed: () => print(_addTextController.text))
+                  onPressed: () => asyncFunc.addTodo(addTextController.text))
             ],
           ),
           Expanded(
@@ -60,13 +60,19 @@ class TodoListView extends ConsumerWidget {
               data: (todos) => ListView(
                 children: [
                   for (final todo in todos)
-                    CheckboxListTile(
+                    ListTile(
+                      tileColor: Colors.blue.shade200,
                       title: Text(todo.description),
-                      value: todo.completed,
-                      // When tapping on the todo, change its completed status
-                      onChanged: (value) =>
-                          asyncFunc.toggle(todo.pageId, !todo.completed),
-                      // ref.read(asyncTodosProvider.notifier).toggle(todo.id),
+                      leading: Checkbox(
+                          activeColor: Colors.blue,
+                          value: todo.completed,
+                          onChanged: ((value) =>
+                              asyncFunc.toggle(todo.pageId, !todo.completed))
+                          // When tapping on the todo, change its completed status
+                          ),
+                      trailing: MaterialButton(
+                          child: const Icon(Icons.delete),
+                          onPressed: () => asyncFunc.removeTodo(todo.pageId)),
                     ),
                 ],
               ),
