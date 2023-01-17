@@ -51,7 +51,7 @@ class Todo {
 
   factory Todo.fromJson(dynamic todo) {
     final String workPageId = todo['id'];
-    final int workId = todo['properties']['id']['number'];
+    final int workId = todo['properties']['id']['number'] ?? 0;
     final String workDescription = todo['properties']['description']
             ['rich_text']
         .map((text) => text['plain_text'])
@@ -109,12 +109,25 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
     return _fetchTodo();
   }
 
-  Future<void> addTodo(Todo todo) async {
+  Future<void> addTodo(String description) async {
+    final Uri urlPage = Uri.parse(urlNotionPageApi);
+    final String bodyAdd = jsonEncode({
+      "parent": {"database_id": NOTION_DATABASEID},
+      "properties": {
+        "description": {
+          "rich_text": [
+            {
+              "text": {"content": description}
+            }
+          ]
+        }
+      }
+    });
     // Set the state to loading
     state = const AsyncValue.loading();
     // Add the new todo and reload the todo list from the remote repository
     state = await AsyncValue.guard(() async {
-      await http.post('api/todos', todo.toJson());
+      await http.post(urlPage, headers: headersApi, body: bodyAdd);
       return _fetchTodo();
     });
   }
