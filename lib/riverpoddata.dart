@@ -49,15 +49,21 @@ class Todo {
     required this.completed,
   });
 
-  factory Todo.fromJson(Map<String, dynamic> map) {
+  factory Todo.fromJson(dynamic todo) {
+    final String workPageId = todo['id'];
+    final int workId = todo['properties']['id']['number'];
+    final String workDescription = todo['properties']['description']
+            ['rich_text']
+        .map((text) => text['plain_text'])
+        .toList()
+        .join();
+    final bool workCompleted = todo['properties']['completed']['checkbox'];
+
     return Todo(
-      pageId: map['pageId'] as String,
-      id: map['id']['number'] as int,
-      description: map['description']['rich_text']
-          .map((text) => text['plain_text'])
-          .toList()
-          .join() as String,
-      completed: map['completed']['checkbox'] as bool,
+      pageId: workPageId,
+      id: workId,
+      description: workDescription,
+      completed: workCompleted,
     );
   }
   // All properties should be `final` on our class.
@@ -79,21 +85,19 @@ class Todo {
 // The public methods on this class will be what allow the UI to modify the state.
 class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
   Future<List<Todo>> _fetchTodo() async {
-    try {
-      final json = await http.post(urlDB, headers: headersApi, body: bodyGet);
-      final todos = jsonDecode(json.body);
-      final todosWork = todos["results"].map<Todo>((todo) =>
-          Todo.fromJson({'pageId': todo['id']}..addAll(todo["properties"])));
-
-      final List<Todo> todoList = todosWork.toList();
-      return todoList;
-    } catch (e) {
-      print(e);
-      // return [Todo.fromJson(nullTodo)];
-      return [
-        Todo(pageId: 'page', id: 0, description: e.toString(), completed: false)
-      ];
-    }
+    // try {
+    final json = await http.post(urlDB, headers: headersApi, body: bodyGet);
+    final todos = jsonDecode(json.body);
+    final todoList =
+        todos["results"].map<Todo>((todo) => Todo.fromJson(todo)).toList();
+    // final List<Todo> todoList = todosWork.toList();
+    return todoList;
+    // } catch (e) {
+    //   print(e);
+    //   return [
+    //     Todo(pageId: 'page', id: 0, description: e.toString(), completed: false)
+    //   ];
+    // }
   }
 
   @override
