@@ -94,6 +94,8 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
     return todoList;
     // } catch (e) {
     //   print(e);
+    //   // state =  AsyncValue.error(e,);
+
     //   return [
     //     Todo(pageId: 'page', id: 0, description: e.toString(), completed: false)
     //   ];
@@ -103,18 +105,19 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
   @override
   Future<List<Todo>> build() async {
     // Load initial todo list from the remote repository
+    state = const AsyncValue.loading();
     return _fetchTodo();
   }
 
-  // Future<void> addTodo(Todo todo) async {
-  //   // Set the state to loading
-  //   state = const AsyncValue.loading();
-  //   // Add the new todo and reload the todo list from the remote repository
-  //   state = await AsyncValue.guard(() async {
-  //     await http.post('api/todos', todo.toJson());
-  //     return _fetchTodo();
-  //   });
-  // }
+  Future<void> addTodo(Todo todo) async {
+    // Set the state to loading
+    state = const AsyncValue.loading();
+    // Add the new todo and reload the todo list from the remote repository
+    state = await AsyncValue.guard(() async {
+      await http.post('api/todos', todo.toJson());
+      return _fetchTodo();
+    });
+  }
 
   // // Let's allow removing todos
   // Future<void> removeTodo(String todoId) async {
@@ -126,11 +129,11 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
   // }
 
   // Let's mark a todo as completed
-  Future<void> toggle(String pageId, bool completed) async {
+  Future<void> toggle(String pageId, bool reverseCompleted) async {
     final Uri urlPage = Uri.parse(urlNotionPageApi + pageId);
     final String bodyPatch = jsonEncode({
       "properties": {
-        "completed": {"checkbox": completed}
+        "completed": {"checkbox": reverseCompleted}
       }
     });
 
@@ -138,6 +141,13 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
     state = await AsyncValue.guard(() async {
       await http.patch(urlPage, headers: headersApi, body: bodyPatch);
 
+      return _fetchTodo();
+    });
+  }
+
+  Future<void> rebuild() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
       return _fetchTodo();
     });
   }
