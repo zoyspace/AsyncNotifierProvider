@@ -100,7 +100,6 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
   @override
   Future<List<Todo>> build() async {
     // Load initial todo list from the remote repository
-    state = const AsyncValue.loading();
     return _fetchTodo();
   }
 
