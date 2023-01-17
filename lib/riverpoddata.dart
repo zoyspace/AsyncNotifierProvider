@@ -132,14 +132,17 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
     });
   }
 
-  // // Let's allow removing todos
-  // Future<void> removeTodo(String todoId) async {
-  //   state = const AsyncValue.loading();
-  //   state = await AsyncValue.guard(() async {
-  //     await http.delete('api/todos/$todoId');
-  //     return _fetchTodo();
-  //   });
-  // }
+  // Let's allow removing todos
+  Future<void> removeTodo(String pageId) async {
+    final Uri urlPage = Uri.parse(urlNotionPageApi + pageId);
+    final String bodyPatchDel = jsonEncode({"archived": true});
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await http.patch(urlPage, headers: headersApi, body: bodyPatchDel);
+
+      return _fetchTodo();
+    });
+  }
 
   // Let's mark a todo as completed
   Future<void> toggle(String pageId, bool reverseCompleted) async {
