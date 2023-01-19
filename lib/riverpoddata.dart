@@ -1,10 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '.env.dart';
-
 import 'package:http/http.dart' as http;
+import '.env.dart';
 
 // const sampleApiUrl = 'https://api.sampleapis.com/coffee/hot';
 const String urlNotionDBApi =
@@ -17,24 +15,15 @@ const Map<String, String> headersApi = {
 };
 
 const Map<String, dynamic> bodyGetApi = {
-  "filter": {
-    "or": [
-      // {
-      //   "property": "completed",
-      //   "checkbox": {"equals": true}
-      // },
-      // {
-      //   "property": "id",
-      //   "number": {"greater_than_or_equal_to": 0}
-      // }
-    ]
-  },
+  "filter": {"or": []},
   "sorts": [
-    {"property": "main", "direction": "ascending"}
+    // {"property": "main", "direction": "ascending"}
+    {"timestamp": "created_time", "direction": "ascending"}
   ]
 };
 
 final Uri urlDB = Uri.parse(urlNotionDBApi);
+final Uri urlPage = Uri.parse(urlNotionPageApi);
 final String bodyGet = jsonEncode(bodyGetApi);
 
 //riverpod
@@ -49,7 +38,7 @@ class Todo {
   });
 
   factory Todo.fromJson(dynamic todo) {
-    final String workPageId = todo['id'];
+    final String workpageId = todo['id'];
     final String workDescription = todo['properties']['description']
             ['rich_text']
         .map((text) => text['plain_text'])
@@ -58,7 +47,7 @@ class Todo {
     final bool workCompleted = todo['properties']['completed']['checkbox'];
 
     return Todo(
-      pageId: workPageId,
+      pageId: workpageId,
       description: workDescription,
       completed: workCompleted,
     );
@@ -67,11 +56,6 @@ class Todo {
   final String pageId;
   final String description;
   final bool completed;
-
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'description': description,
-        'completed': completed,
-      };
 }
 
 // The Notifier class that will be passed to our NotifierProvider.
@@ -80,21 +64,11 @@ class Todo {
 // The public methods on this class will be what allow the UI to modify the state.
 class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
   Future<List<Todo>> _fetchTodo() async {
-    // try {
     final json = await http.post(urlDB, headers: headersApi, body: bodyGet);
     final todos = jsonDecode(json.body);
     final todoList =
         todos["results"].map<Todo>((todo) => Todo.fromJson(todo)).toList();
-    // final List<Todo> todoList = todosWork.toList();
     return todoList;
-    // } catch (e) {
-    //   print(e);
-    //   // state =  AsyncValue.error(e,);
-
-    //   return [
-    //     Todo(pageId: 'page', id: 0, description: e.toString(), completed: false)
-    //   ];
-    // }
   }
 
   @override
@@ -104,7 +78,6 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
   }
 
   Future<void> addTodo(String description) async {
-    final Uri urlPage = Uri.parse(urlNotionPageApi);
     final String bodyAdd = jsonEncode({
       "parent": {"database_id": NOTION_DATABASEID},
       "properties": {
@@ -127,29 +100,29 @@ class AsyncTodosNotifier extends AsyncNotifier<List<Todo>> {
   }
 
   // Let's allow removing todos
-  Future<void> removeTodo(String pageId) async {
-    final Uri urlPage = Uri.parse(urlNotionPageApi + pageId);
+  Future<void> removeTodo(Todo todo) async {
+    final Uri urlPageId = Uri.parse(urlNotionPageApi + todo.pageId);
     final String bodyPatchDel = jsonEncode({"archived": true});
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await http.patch(urlPage, headers: headersApi, body: bodyPatchDel);
+      await http.patch(urlPageId, headers: headersApi, body: bodyPatchDel);
 
       return _fetchTodo();
     });
   }
 
   // Let's mark a todo as completed
-  Future<void> toggle(String pageId, bool reverseCompleted) async {
-    final Uri urlPage = Uri.parse(urlNotionPageApi + pageId);
+  Future<void> toggle(Todo todo) async {
+    final Uri urlPageId = Uri.parse(urlNotionPageApi + todo.pageId);
     final String bodyPatch = jsonEncode({
       "properties": {
-        "completed": {"checkbox": reverseCompleted}
+        "completed": {"checkbox": !todo.completed}
       }
     });
 
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await http.patch(urlPage, headers: headersApi, body: bodyPatch);
+      await http.patch(urlPageId, headers: headersApi, body: bodyPatch);
 
       return _fetchTodo();
     });
