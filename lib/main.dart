@@ -42,9 +42,17 @@ class TodoListView extends ConsumerWidget {
               children: [
                 Expanded(
                   child: TextField(
-                    decoration: const InputDecoration(
-                      fillColor: Colors.indigoAccent,
-                      filled: true,
+                    decoration: InputDecoration(
+                      // border: OutlineInputBorder(
+                      //   borderRadius: BorderRadius.circular(10),
+                      // ),
+                      enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Colors.blue,
+                          )),
+                      // fillColor: Colors.indigoAccent,
+                      // filled: true,
                       // icon: Icon(Icons.add),
                       // hintText: "shopping",
                       // labelText: "add todo",
@@ -66,18 +74,17 @@ class TodoListView extends ConsumerWidget {
                   children: [
                     for (final todo in todos)
                       ListTile(
-                        tileColor: Colors.blue.shade200,
+                        tileColor: Colors.blue.shade100,
                         title: Text(todo.description),
                         leading: Checkbox(
                             activeColor: Colors.deepOrange,
                             value: todo.completed,
-                            onChanged: ((value) =>
-                                asyncFunc.toggle(todo.pageId, !todo.completed))
+                            onChanged: ((value) => asyncFunc.toggle(todo))
                             // When tapping on the todo, change its completed status
                             ),
                         trailing: MaterialButton(
                             child: const Icon(Icons.delete),
-                            onPressed: () => asyncFunc.removeTodo(todo.pageId)),
+                            onPressed: () => asyncFunc.removeTodo(todo)),
                       ),
                   ],
                 ),
