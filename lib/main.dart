@@ -1,3 +1,4 @@
+import 'package:asyncnotifierprovider/alisttile.dart';
 import 'package:asyncnotifierprovider/riverpoddata.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,13 +17,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const TodoListView(),
+      home: TodoListView(),
     );
   }
 }
 
 class TodoListView extends ConsumerWidget {
-  const TodoListView({Key? key}) : super(key: key);
+  TodoListView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -71,24 +72,11 @@ class TodoListView extends ConsumerWidget {
             Expanded(
               child: asyncTodos.when(
                 data: (todos) => ListView(
-                  children: [
-                    for (final todo in todos)
-                      ListTile(
-                        tileColor: Colors.blue.shade100,
-                        title: Text(todo.description),
-                        leading: Checkbox(
-                            activeColor: Colors.deepOrange,
-                            value: todo.completed,
-                            onChanged: ((value) => asyncFunc.toggle(todo))
-                            // When tapping on the todo, change its completed status
-                            ),
-                        trailing: MaterialButton(
-                            child: const Icon(Icons.delete),
-                            onPressed: () => asyncFunc.removeTodo(todo)),
-                      ),
-                  ],
+                  children: [for (final todo in todos) (AListTile(todo))],
                 ),
-                loading: () => const Center(
+                loading: () =>
+                    // ()
+                    const Center(
                   child: CircularProgressIndicator(),
                 ),
                 error: (err, stack) => Column(
