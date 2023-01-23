@@ -11,11 +11,11 @@ class AListTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var asyncTile = ref.watch(asyncTileProviderFamily(todo));
     var asyncRead = ref.read(asyncTileProviderFamily(todo).notifier);
-    print(identityHashCode(asyncRead));
+    // print(identityHashCode(asyncRead));
 
     return asyncTile.when(
       data: (data) => _isRemove
-          ? Text('removed')
+          ? const Center(child: Text('removed'))
           : ListTile(
               tileColor: Colors.blue.shade100,
               title: Text(
@@ -24,11 +24,11 @@ class AListTile extends ConsumerWidget {
               leading: Checkbox(
                   activeColor: Colors.deepOrange,
                   value: data.completed,
-                  onChanged: ((value) => asyncRead.toggle(todo))),
+                  onChanged: ((value) => asyncRead.toggle(data))),
               trailing: MaterialButton(
                   child: const Icon(Icons.delete),
                   onPressed: () {
-                    asyncRead.removeA(todo);
+                    asyncRead.removeA(data);
                     _isRemove = true;
                   })),
       loading: () => const Center(
