@@ -129,9 +129,6 @@ final asyncTodosProvider =
 // our TodosNotifier class.
 
 class AsyncTileNotifier extends FamilyAsyncNotifier<Todo, Todo> {
-  AsyncTileNotifier(this.todo);
-  Todo todo;
-
   @override
   build(Todo arg) async {
     // return await initbuild(Todo todo);
@@ -178,6 +175,5 @@ class AsyncTileNotifier extends FamilyAsyncNotifier<Todo, Todo> {
 
 final asyncTileProviderFamily =
     AsyncNotifierProvider.family<AsyncTileNotifier, Todo, Todo>(() {
-  return AsyncTileNotifier(
-      const Todo(pageId: 'a', description: 'a', completed: false));
+  return AsyncTileNotifier();
 });
